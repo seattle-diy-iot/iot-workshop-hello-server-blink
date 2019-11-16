@@ -12,7 +12,7 @@ const int led = D5;
 boolean state = false;
 
 void handleRoot() {
-  String message = "hello from esp8266!<br/>Refresh to blink.";
+  String message = "hello from esp8266!<br/>Refresh to toggle LED.";
   message.concat("<br/>LED is: ");
   message.concat((state) ? "on": "off");
   server.send(200, "text/html", message);
