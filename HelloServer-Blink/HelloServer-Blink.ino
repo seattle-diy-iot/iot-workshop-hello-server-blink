@@ -6,41 +6,18 @@
 const char* ssid = "IoT Hub";
 const char* password = "letsbuildsomething";
 
+// initialize server port (standard HTTP)
 ESP8266WebServer server(80);
 
-const int led = D5;
+const int LED = D5;
 boolean state = false;
 
-void handleRoot() {
-  String message = "hello from esp8266!<br/>Refresh to toggle LED.";
-  message.concat("<br/>LED is: ");
-  message.concat((state) ? "on": "off");
-  server.send(200, "text/html", message);
-  digitalWrite(led, state);
-  state = (state) ? false : true;
-}
-
-void handleNotFound() {
-  digitalWrite(led, 1);
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
-}
-
 void setup(void) {
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
   Serial.begin(115200);
+  // sets the mode to "STAtion" mode (server)
+  // vs Access Point (AP) mode
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("");
@@ -60,8 +37,10 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
 
+  // request to root url
   server.on("/", handleRoot);
 
+  // request to /inline url (path)
   server.on("/inline", []() {
     server.send(200, "text/plain", "this works as well");
   });
@@ -74,4 +53,20 @@ void setup(void) {
 
 void loop(void) {
   server.handleClient();
+}
+
+void handleRoot() {
+  String message = "Hello from ESP8266!\n";
+  message.concat("Refresh the browser page to toggle LED.\n");
+  message.concat("LED is: ");
+  message.concat((state) ? "on": "off");
+  server.send(200, "text/plain", message);
+  digitalWrite(LED, state);
+  state = (state) ? false : true;
+}
+
+void handleNotFound() {
+  String message = "File Not Found\n\n";
+  server.send(404, "text/plain", message);
+  digitalWrite(LED, LOW);
 }
